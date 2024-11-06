@@ -29,13 +29,15 @@ class Users::Create < ActiveInteraction::Base
       skill = Skil.find_or_create_by(name: skill_name)
       user.skils << skill unless user.skils.include?(skill)
     end
+
+    user.save
   end
 
   private
 
   def unique_email
     if User.exists?(email: email)
-      errors.add(:email, 'email already in use')
+      errors.add(:email, 'already in use')
     end
   end
 end
