@@ -16,21 +16,23 @@ class Users::Create < ActiveInteraction::Base
   validate  :unique_email
 
   def execute
-    user_full_name = "#{inputs[:surname]} #{inputs[:name]} #{inputs[:patronymic]}"
-    user_params = inputs.except(:interests, :skills)
-    user = User.new(user_params.merge(full_name: user_full_name))
+    User.transaction do
+      user_full_name = "#{inputs[:surname]} #{inputs[:name]} #{inputs[:patronymic]}"
+      user_params = inputs.except(:interests, :skills)
+      user = User.new(user_params.merge(full_name: user_full_name))
 
-    interests.each do |interest_name|
-      interest = Interest.find_or_create_by(name: interest_name)
-      user.interests << interest unless user.interests.include?(interest)
+      interests.each do |interest_name|
+        interest = Interest.find_or_create_by(name: interest_name)
+        user.interests << interest unless user.interests.include?(interest)
+      end
+
+      skills.each do |skill_name|
+        skill = Skil.find_or_create_by(name: skill_name)
+        user.skils << skill unless user.skils.include?(skill)
+      end
+
+      user.save
     end
-
-    skills.each do |skill_name|
-      skill = Skil.find_or_create_by(name: skill_name)
-      user.skils << skill unless user.skils.include?(skill)
-    end
-
-    user.save
   end
 
   private
